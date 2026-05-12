@@ -26,7 +26,7 @@ app.listen(3000, () => {
   console.log("Serwer HTTP działa");
 });
 
-const VERIFIED_ROLE_ID = "1499847440910516464";
+const VERIFIED_ROLE_ID = "1503722955312599040";
 
 const ticketNames = {
   zakup: "zakup",
@@ -148,8 +148,70 @@ Opisz dokładnie swoją sprawę, a administracja niedługo odpowie.`;
 client.once("ready", () => {
   console.log(`Zalogowano jako ${client.user.tag}`);
 });
+client.once("ready", () => {
+  console.log(`Zalogowano jako ${client.user.tag}`);
+});
+
+client.on("messageCreate", async (message) => {
+  if (message.author.bot) return;
+  if (!message.guild) return;
+
+  if (message.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+    return;
+  }
+
+  const linkRegex =
+    /(https?:\/\/|www\.|discord\.gg\/|discord\.com\/invite\/|dc\.gg\/|\.pl|\.com|\.net|\.gg)/i;
+
+  if (linkRegex.test(message.content)) {
+    await message.delete().catch(() => null);
+
+    const warning = await message.channel.send({
+      content: `${message.author}, nie wysyłaj linków na tym serwerze.`,
+    });
+
+    setTimeout(() => {
+      warning.delete().catch(() => null);
+    }, 5000);
+  }
+});
 
 client.on("interactionCreate", async (interaction) => {
+  console.log(
+    "Interaction:",
+    interaction.type,
+    interaction.commandName || interaction.customId
+  );
+
+  // reszta twojego kodu
+});
+
+
+client.on("interactionCreate", async (interaction) => {
+  client.on("messageCreate", async (message) => {
+  if (message.author.bot) return;
+  if (!message.guild) return;
+
+  if (message.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+    return;
+  }
+
+  const linkRegex =
+    /(https?:\/\/|www\.|discord\.gg\/|discord\.com\/invite\/|\.pl|\.com|\.net|\.gg)/i;
+
+  if (linkRegex.test(message.content)) {
+    await message.delete().catch(() => null);
+
+    const warning = await message.channel.send({
+      content: `${message.author}, nie wysyłaj linków na tym serwerze.`,
+    });
+
+    setTimeout(() => {
+      warning.delete().catch(() => null);
+    }, 5000);
+  }
+});
+
   console.log(
     "Interaction:",
     interaction.type,
