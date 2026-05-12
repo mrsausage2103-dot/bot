@@ -156,8 +156,22 @@ client.on("interactionCreate", async (interaction) => {
     interaction.commandName || interaction.customId
   );
 
-  if (interaction.isChatInputCommand()) {
-    if (interaction.commandName === "konkurs") {
+
+   if (interaction.isChatInputCommand()) {
+  const adminOnlyCommands = ["tickets", "cennik", "weryfikacja", "konkurs", "losuj"];
+
+  if (
+    adminOnlyCommands.includes(interaction.commandName) &&
+    !interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)
+  ) {
+    return interaction.reply({
+      content: "❌ Tylko administrator może używać tej komendy.",
+      ephemeral: true,
+    });
+  }
+
+  if (interaction.commandName === "konkurs") {
+
       konkursUczestnicy.clear();
       konkursAktywny = true;
 
