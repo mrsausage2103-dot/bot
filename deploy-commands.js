@@ -20,25 +20,43 @@ const commands = [
     .setDescription("Losuje zniżkę"),
 
   new SlashCommandBuilder()
-    .setName("konkurs")
-    .setDescription("Tworzy konkurs z przyciskiem"),
+  .setName("konkurs")
+  .setDescription("Tworzy konkurs")
+  .addStringOption((option) =>
+    option
+      .setName("nagroda")
+      .setDescription("Co można wygrać?")
+      .setRequired(true)
+  )
+  .addIntegerOption((option) =>
+    option
+      .setName("czas")
+      .setDescription("Czas trwania konkursu w minutach")
+      .setRequired(true)
+  )
+  .addStringOption((option) =>
+    option
+      .setName("opis")
+      .setDescription("Opis konkursu")
+      .setRequired(false)
+  ),
 
-  new SlashCommandBuilder()
-    .setName("losuj")
-    .setDescription("Losuje zwycięzcę konkursu"),
 ].map((command) => command.toJSON());
 
 const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
 (async () => {
   try {
-    console.log("Dodawanie komend...");
+    console.log("Czyszczenie globalnych komend...");
+
+    await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
+      body: [],
+    });
+
+    console.log("Dodawanie komend na serwer...");
 
     await rest.put(
-      Routes.applicationGuildCommands(
-        process.env.CLIENT_ID,
-        process.env.GUILD_ID
-      ),
+      Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
       { body: commands }
     );
 
