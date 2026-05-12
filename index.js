@@ -37,8 +37,7 @@ const ticketNames = {
   pomoc: "pomoc",
 };
 
-const konkursUczestnicy = new Set();
-let konkursAktywny = false;
+const konkursy = new Map();
 
 const client = new Client({
   intents: [
@@ -51,6 +50,43 @@ const client = new Client({
 
 function cleanName(name) {
   return name.toLowerCase().replace(/[^a-z0-9]/g, "-").slice(0, 20);
+}
+
+async function zakonczKonkurs(konkursId) {
+  const konkurs = konkursy.get(konkursId);
+  if (!konkurs) return;
+
+  konkursy.delete(konkursId);
+
+  const channel = await client.channels.fetch(konkurs.channelId).catch(() => null);
+  if (!channel) return;
+
+  const message = await channel.messages.fetch(konkurs.messageId).catch(() => null);
+
+  const disabledButton = new ButtonBuilder()
+    .setCustomId(`konkurs_join_${konkursId}`)
+    .setLabel("Konkurs zakończony")
+    .setStyle(ButtonStyle.Secondary)
+    .setDisabled(true);
+
+  const disabledRow = new ActionRowBuilder().addComponents(disabledButton);
+
+  if (message) {
+    await message.edit({ components: [disabledRow] }).catch(() => null);
+  }
+
+  if (konkurs.uczestnicy.size === 0) {
+    return channel.send(
+      `🎉 Konkurs **${konkurs.nagroda}** zakończony. Nikt nie wziął udziału.`
+    );
+  }
+
+  const uczestnicy = Array.from(konkurs.uczestnicy);
+  const zwyciezcaId = uczestnicy[Math.floor(Math.random() * uczestnicy.length)];
+
+  return channel.send(
+    `🎉 Konkurs **${konkurs.nagroda}** zakończony!\n🏆 Zwycięzca: <@${zwyciezcaId}>`
+  );
 }
 
 async function createTicket(interaction, choice, answers = null) {
@@ -175,14 +211,8 @@ client.on("messageCreate", async (message) => {
 });
 
 client.on("interactionCreate", async (interaction) => {
-  console.log(
-    "Interaction:",
-    interaction.type,
-    interaction.commandName || interaction.customId
-  );
-
   if (interaction.isChatInputCommand()) {
-    const adminOnlyCommands = ["tickets", "cennik", "weryfikacja", "konkurs", "losuj"];
+    const adminOnlyCommands = ["tickets", "cennik", "weryfikacja", "konkurs"];
 
     if (
       adminOnlyCommands.includes(interaction.commandName) &&
@@ -195,49 +225,56 @@ client.on("interactionCreate", async (interaction) => {
     }
 
     if (interaction.commandName === "konkurs") {
-      konkursUczestnicy.clear();
-      konkursAktywny = true;
+      const nagroda = interaction.options.getString("nagroda") || "Nagroda";
+      const opis =
+        interaction.options.getString("opis") ||
+        "Kliknij przycisk poniżej, aby wziąć udział.";
+      const czas = interaction.options.getInteger("czas") || 10;
+
+      const konkursId = `${Date.now()}`;
+      const koniec = Math.floor((Date.now() + czas * 60 * 1000) / 1000);
 
       const joinButton = new ButtonBuilder()
-        .setCustomId("konkurs_join")
+        .setCustomId(`konkurs_join_${konkursId}`)
         .setLabel("Weź udział")
         .setStyle(ButtonStyle.Primary);
 
       const row = new ActionRowBuilder().addComponents(joinButton);
 
-      return interaction.reply({
-        content: `🎉 **KONKURS!**
+      const embed = new EmbedBuilder()
+        .setColor("#800080")
+        .setTitle("🎉 PixelCoreShop × KONKURS")
+        .addFields(
+          { name: "🎁 Nagroda", value: `**${nagroda}**`, inline: false },
+          { name: "⏰ Czas", value: `**${czas} minut**`, inline: true },
+          { name: "📅 Koniec", value: `<t:${koniec}:R>`, inline: true },
+          { name: "📋 Opis", value: opis, inline: false }
+        )
+        .setFooter({
+          text: "PixelCoreShop × KONKURSY",
+          iconURL: interaction.guild.iconURL({ dynamic: true }),
+        });
 
-Kliknij przycisk poniżej, aby wziąć udział.`,
+      await interaction.reply({
+        embeds: [embed],
         components: [row],
       });
-    }
 
-    if (interaction.commandName === "losuj") {
-      if (!konkursAktywny) {
-        return interaction.reply({
-          content: "Nie ma aktywnego konkursu.",
-          ephemeral: true,
-        });
-      }
+      const message = await interaction.fetchReply();
 
-      if (konkursUczestnicy.size === 0) {
-        return interaction.reply({
-          content: "Nikt nie dołączył do konkursu.",
-          ephemeral: true,
-        });
-      }
-
-      const uczestnicy = Array.from(konkursUczestnicy);
-      const zwyciezcaId =
-        uczestnicy[Math.floor(Math.random() * uczestnicy.length)];
-
-      konkursAktywny = false;
-      konkursUczestnicy.clear();
-
-      return interaction.reply({
-        content: `🎉 Zwycięzca konkursu to <@${zwyciezcaId}>!`,
+      konkursy.set(konkursId, {
+        nagroda,
+        opis,
+        uczestnicy: new Set(),
+        channelId: message.channel.id,
+        messageId: message.id,
       });
+
+      setTimeout(() => {
+        zakonczKonkurs(konkursId);
+      }, czas * 60 * 1000);
+
+      return;
     }
 
     if (interaction.commandName === "drop") {
@@ -268,18 +305,6 @@ Kliknij przycisk poniżej, aby wziąć udział.`,
         .setColor("#800080")
         .setTitle("✅ PixelCoreShop × WERYFIKACJA")
         .setDescription("Kliknij przycisk poniżej, aby się zweryfikować.")
-        .addFields(
-          {
-            name: "📌 Status",
-            value: "Niezweryfikowany",
-            inline: true,
-          },
-          {
-            name: "🎁 Po weryfikacji",
-            value: "Otrzymasz dostęp do serwera.",
-            inline: true,
-          }
-        )
         .setFooter({
           text: "© 2026 PixelCoreShop × WERYFIKACJA",
           iconURL: interaction.guild.iconURL({ dynamic: true }),
@@ -490,25 +515,28 @@ Kliknij przycisk poniżej, aby wziąć udział.`,
   }
 
   if (interaction.isButton()) {
-    if (interaction.customId === "konkurs_join") {
-      if (!konkursAktywny) {
+    if (interaction.customId.startsWith("konkurs_join_")) {
+      const konkursId = interaction.customId.replace("konkurs_join_", "");
+      const konkurs = konkursy.get(konkursId);
+
+      if (!konkurs) {
         return interaction.reply({
           content: "Ten konkurs już się zakończył.",
           ephemeral: true,
         });
       }
 
-      if (konkursUczestnicy.has(interaction.user.id)) {
+      if (konkurs.uczestnicy.has(interaction.user.id)) {
         return interaction.reply({
-          content: "Już bierzesz udział w konkursie.",
+          content: "Już bierzesz udział w tym konkursie.",
           ephemeral: true,
         });
       }
 
-      konkursUczestnicy.add(interaction.user.id);
+      konkurs.uczestnicy.add(interaction.user.id);
 
       return interaction.reply({
-        content: "Dołączyłeś do konkursu!",
+        content: `Dołączyłeś do konkursu o **${konkurs.nagroda}**!`,
         ephemeral: true,
       });
     }
