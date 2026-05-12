@@ -28,6 +28,8 @@ app.listen(3000, () => {
 
 const VERIFIED_ROLE_ID = "1503722955312599040";
 const VERIFIED_ROLE_ID_2 = "1503706292189921481";
+const LINK_ALLOWED_ROLE_ID = "1503847409506058361";
+
 
 const ticketNames = {
   zakup: "zakup",
@@ -194,8 +196,13 @@ client.on("messageCreate", async (message) => {
     return;
   }
 
+  if (message.member.roles.cache.has(LINK_ALLOWED_ROLE_ID)) {
+    return;
+  }
+
   const linkRegex =
     /(https?:\/\/|www\.|discord\.gg\/|discord\.com\/invite\/|dc\.gg\/|\.pl|\.com|\.net|\.gg)/i;
+
 
   if (linkRegex.test(message.content)) {
     await message.delete().catch(() => null);
