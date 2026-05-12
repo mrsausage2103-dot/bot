@@ -27,6 +27,7 @@ app.listen(3000, () => {
 });
 
 const VERIFIED_ROLE_ID = "1503722955312599040";
+const VERIFIED_ROLE_ID_2 = "1503706292189921481";
 
 const ticketNames = {
   zakup: "zakup",
@@ -38,6 +39,7 @@ const ticketNames = {
 
 const konkursUczestnicy = new Set();
 let konkursAktywny = false;
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -46,7 +48,6 @@ const client = new Client({
     GatewayIntentBits.GuildMembers,
   ],
 });
-
 
 function cleanName(name) {
   return name.toLowerCase().replace(/[^a-z0-9]/g, "-").slice(0, 20);
@@ -148,9 +149,6 @@ Opisz dokładnie swoją sprawę, a administracja niedługo odpowie.`;
 client.once("ready", () => {
   console.log(`Zalogowano jako ${client.user.tag}`);
 });
-client.once("ready", () => {
-  console.log(`Zalogowano jako ${client.user.tag}`);
-});
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
@@ -183,57 +181,20 @@ client.on("interactionCreate", async (interaction) => {
     interaction.commandName || interaction.customId
   );
 
-  // reszta twojego kodu
-});
+  if (interaction.isChatInputCommand()) {
+    const adminOnlyCommands = ["tickets", "cennik", "weryfikacja", "konkurs", "losuj"];
 
+    if (
+      adminOnlyCommands.includes(interaction.commandName) &&
+      !interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)
+    ) {
+      return interaction.reply({
+        content: "❌ Tylko administrator może używać tej komendy.",
+        ephemeral: true,
+      });
+    }
 
-client.on("interactionCreate", async (interaction) => {
-  client.on("messageCreate", async (message) => {
-  if (message.author.bot) return;
-  if (!message.guild) return;
-
-  if (message.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-    return;
-  }
-
-  const linkRegex =
-    /(https?:\/\/|www\.|discord\.gg\/|discord\.com\/invite\/|\.pl|\.com|\.net|\.gg)/i;
-
-  if (linkRegex.test(message.content)) {
-    await message.delete().catch(() => null);
-
-    const warning = await message.channel.send({
-      content: `${message.author}, nie wysyłaj linków na tym serwerze.`,
-    });
-
-    setTimeout(() => {
-      warning.delete().catch(() => null);
-    }, 5000);
-  }
-});
-
-  console.log(
-    "Interaction:",
-    interaction.type,
-    interaction.commandName || interaction.customId
-  );
-
-
-   if (interaction.isChatInputCommand()) {
-  const adminOnlyCommands = ["tickets", "cennik", "weryfikacja", "konkurs", "losuj"];
-
-  if (
-    adminOnlyCommands.includes(interaction.commandName) &&
-    !interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)
-  ) {
-    return interaction.reply({
-      content: "❌ Tylko administrator może używać tej komendy.",
-      ephemeral: true,
-    });
-  }
-
-  if (interaction.commandName === "konkurs") {
-
+    if (interaction.commandName === "konkurs") {
       konkursUczestnicy.clear();
       konkursAktywny = true;
 
@@ -253,13 +214,6 @@ Kliknij przycisk poniżej, aby wziąć udział.`,
     }
 
     if (interaction.commandName === "losuj") {
-      if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-        return interaction.reply({
-          content: "Nie masz permisji do losowania zwycięzcy.",
-          ephemeral: true,
-        });
-      }
-
       if (!konkursAktywny) {
         return interaction.reply({
           content: "Nie ma aktywnego konkursu.",
@@ -310,9 +264,29 @@ Kliknij przycisk poniżej, aby wziąć udział.`,
 
       const row = new ActionRowBuilder().addComponents(verifyButton);
 
+      const embed = new EmbedBuilder()
+        .setColor("#800080")
+        .setTitle("✅ PixelCoreShop × WERYFIKACJA")
+        .setDescription("Kliknij przycisk poniżej, aby się zweryfikować.")
+        .addFields(
+          {
+            name: "📌 Status",
+            value: "Niezweryfikowany",
+            inline: true,
+          },
+          {
+            name: "🎁 Po weryfikacji",
+            value: "Otrzymasz dostęp do serwera.",
+            inline: true,
+          }
+        )
+        .setFooter({
+          text: "© 2026 PixelCoreShop × WERYFIKACJA",
+          iconURL: interaction.guild.iconURL({ dynamic: true }),
+        });
+
       return interaction.reply({
-        content:
-          "ᴋʟɪᴋɴɪᴊ ᴘʀᴢʏᴄɪꜱᴋ ᴘᴏɴɪᴢ̇ᴇᴊ, ᴀʙʏ ꜱɪᴇ̨ ᴢᴡᴇʀʏꜰɪᴋᴏᴡᴀᴄ́.",
+        embeds: [embed],
         components: [row],
       });
     }
@@ -438,49 +412,10 @@ Kliknij przycisk poniżej, aby wziąć udział.`,
 
   if (interaction.isStringSelectMenu()) {
     if (interaction.customId === "my_dropdown") {
-      const choice = interaction.values[0];
-
-      if (choice === "opcja_1") {
-        return interaction.reply({
-          content: "odp",
-          ephemeral: true,
-        });
-      }
-
-      if (choice === "opcja_2") {
-        return interaction.reply({
-          content: "odp",
-          ephemeral: true,
-        });
-      }
-
-      if (choice === "opcja_3") {
-        return interaction.reply({
-          content: "odp",
-          ephemeral: true,
-        });
-      }
-
-      if (choice === "opcja_4") {
-        return interaction.reply({
-          content: "odp",
-          ephemeral: true,
-        });
-      }
-
-      if (choice === "opcja_5") {
-        return interaction.reply({
-          content: "odp",
-          ephemeral: true,
-        });
-      }
-
-      if (choice === "opcja_6") {
-        return interaction.reply({
-          content: "odp",
-          ephemeral: true,
-        });
-      }
+      return interaction.reply({
+        content: "odp",
+        ephemeral: true,
+      });
     }
 
     if (interaction.customId !== "ticket_select") return;
@@ -508,26 +443,25 @@ Kliknij przycisk poniżej, aby wziąć udział.`,
         .setTitle("Zakup");
 
       const itemInput = new TextInputBuilder()
-  .setCustomId("zakup_item")
-  .setLabel("Co chcesz kupić?")
-  .setStyle(TextInputStyle.Short)
-  .setPlaceholder("❌ x Nie wybrano żadnej opcji")
-  .setRequired(true);
+        .setCustomId("zakup_item")
+        .setLabel("Co chcesz kupić?")
+        .setStyle(TextInputStyle.Short)
+        .setPlaceholder("np. SAB, Robux, PS99")
+        .setRequired(true);
 
-const budgetInput = new TextInputBuilder()
-  .setCustomId("zakup_budget")
-  .setLabel("Jaki masz budżet?")
-  .setStyle(TextInputStyle.Short)
-  .setPlaceholder("np. 20 zł, 50 zł, 100 zł")
-  .setRequired(true);
+      const budgetInput = new TextInputBuilder()
+        .setCustomId("zakup_budget")
+        .setLabel("Jaki masz budżet?")
+        .setStyle(TextInputStyle.Short)
+        .setPlaceholder("np. 20 zł, 50 zł, 100 zł")
+        .setRequired(true);
 
-const paymentInput = new TextInputBuilder()
-  .setCustomId("zakup_payment")
-  .setLabel("Czym płacisz?")
-  .setStyle(TextInputStyle.Short)
-  .setPlaceholder("❌ x Nie wybrano żadnej metody płatności")
-  .setRequired(true);
-
+      const paymentInput = new TextInputBuilder()
+        .setCustomId("zakup_payment")
+        .setLabel("Czym płacisz?")
+        .setStyle(TextInputStyle.Short)
+        .setPlaceholder("np. BLIK, PayPal, PSC")
+        .setRequired(true);
 
       modal.addComponents(
         new ActionRowBuilder().addComponents(itemInput),
@@ -581,26 +515,34 @@ const paymentInput = new TextInputBuilder()
 
     if (interaction.customId === "verify") {
       const member = interaction.member;
+
       const role = await interaction.guild.roles
         .fetch(VERIFIED_ROLE_ID)
         .catch(() => null);
 
-      if (!role) {
+      const role2 = await interaction.guild.roles
+        .fetch(VERIFIED_ROLE_ID_2)
+        .catch(() => null);
+
+      if (!role || !role2) {
         return interaction.reply({
           content:
-            "Nie znaleziono roli weryfikacyjnej. Sprawdź ID roli i czy bot jest na dobrym serwerze.",
+            "Nie znaleziono jednej z ról weryfikacyjnych. Sprawdź ID ról i czy bot jest na dobrym serwerze.",
           ephemeral: true,
         });
       }
 
-      if (member.roles.cache.has(VERIFIED_ROLE_ID)) {
+      if (
+        member.roles.cache.has(VERIFIED_ROLE_ID) &&
+        member.roles.cache.has(VERIFIED_ROLE_ID_2)
+      ) {
         return interaction.reply({
           content: "Już jesteś zweryfikowany.",
           ephemeral: true,
         });
       }
 
-      await member.roles.add(role);
+      await member.roles.add([role, role2]);
 
       return interaction.reply({
         content: "Zostałeś zweryfikowany!",
