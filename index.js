@@ -332,10 +332,20 @@ Przebywanie na serwerze oznacza pełną akceptację zasad.
     return;
   }
 
-  const linkRegex =
+   const linkRegex =
     /(https?:\/\/|www\.|discord\.gg\/|discord\.com\/invite\/|dc\.gg\/|\.pl|\.com|\.net|\.gg)/i;
 
-    if (linkRegex.test(message.content)) {
+  const gifLinkRegex =
+    /https?:\/\/\S+\.(gif)(\?\S*)?$/i;
+
+  const hasGifAttachment = message.attachments.some((attachment) =>
+    attachment.contentType === "image/gif" ||
+    attachment.name?.toLowerCase().endsWith(".gif")
+  );
+
+  const hasAllowedGifLink = gifLinkRegex.test(message.content);
+
+  if (linkRegex.test(message.content) && !hasAllowedGifLink && !hasGifAttachment) {
     await message.delete().catch(() => null);
 
     const warning = await message.channel.send({
@@ -346,6 +356,7 @@ Przebywanie na serwerze oznacza pełną akceptację zasad.
       warning.delete().catch(() => null);
     }, 5000);
   }
+
 });
 
 
