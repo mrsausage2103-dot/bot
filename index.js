@@ -15,6 +15,7 @@ const {
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
+  SlashCommandBuilder,
 } = require("discord.js");
 
 const app = express();
@@ -31,7 +32,6 @@ const VERIFIED_ROLE_ID = "1503722955312599040";
 const VERIFIED_ROLE_ID_2 = "1503706292189921481";
 const LINK_ALLOWED_ROLE_ID = "1503847409506058361";
 
-
 const ticketNames = {
   zakup: "zakup",
   skup: "skup",
@@ -41,6 +41,7 @@ const ticketNames = {
 };
 
 const konkursy = new Map();
+const tworzoneTickety = new Set();
 
 const client = new Client({
   intents: [
@@ -53,6 +54,10 @@ const client = new Client({
 
 function cleanName(name) {
   return name.toLowerCase().replace(/[^a-z0-9]/g, "-").slice(0, 20);
+}
+
+function isTicketChannel(channel) {
+  return channel?.type === ChannelType.GuildText && channel.name.startsWith("ticket-");
 }
 
 async function zakonczKonkurs(konkursId) {
@@ -96,20 +101,34 @@ async function createTicket(interaction, choice, answers = null) {
   if (!interaction.guild) return;
 
   const categoryName = ticketNames[choice] || "ticket";
-  const userName = cleanName(interaction.user.username);
+  const lockKey = `${interaction.guild.id}:${interaction.user.id}`;
 
-  const existing = interaction.guild.channels.cache.find(
-    (c) => c.name === `ticket-${categoryName}-${userName}`
-  );
-
-  if (existing) {
+  if (tworzoneTickety.has(lockKey)) {
     return interaction.reply({
-      content: "❌ ᴍᴀꜱᴢ ᴊᴜᴢ̇ ᴏᴛᴡᴀʀᴛʏ ᴛɪᴄᴋᴇᴛ!",
+      content: "❌ Ticket jest już tworzony, poczekaj chwilę.",
       ephemeral: true,
     });
   }
 
+  tworzoneTickety.add(lockKey);
+
   try {
+    const existing = interaction.guild.channels.cache.find(
+      (c) =>
+        c.type === ChannelType.GuildText &&
+        c.topic?.includes(`User: ${interaction.user.id}`) &&
+        c.name.startsWith(`ticket-${categoryName}-`)
+    );
+
+    if (existing) {
+      return interaction.reply({
+        content: "❌ ᴍᴀꜱᴢ ᴊᴜᴢ̇ ᴏᴛᴡᴀʀᴛʏ ᴛɪᴄᴋᴇᴛ!",
+        ephemeral: true,
+      });
+    }
+
+    const userName = cleanName(interaction.user.username);
+
     const channel = await interaction.guild.channels.create({
       name: `ticket-${categoryName}-${userName}`,
       type: ChannelType.GuildText,
@@ -161,7 +180,7 @@ Opisz dokładnie swoją sprawę, a administracja niedługo odpowie.`;
       .setTitle("🎫 Ticket utworzony")
       .setDescription(description)
       .setFooter({
-        text: "`PixelCoreShop × TICKETY`",
+        text: "PixelCoreShop × TICKETY",
         iconURL: interaction.guild.iconURL({ dynamic: true }),
       });
 
@@ -182,10 +201,12 @@ Opisz dokładnie swoją sprawę, a administracja niedługo odpowie.`;
       content: "❌ Wystąpił błąd przy tworzeniu ticketa.",
       ephemeral: true,
     });
+  } finally {
+    tworzoneTickety.delete(lockKey);
   }
 }
 
-client.once("ready", () => {
+client.once("ready", async () => {
   console.log(`Zalogowano jako ${client.user.tag}`);
 
   client.user.setPresence({
@@ -197,8 +218,51 @@ client.once("ready", () => {
     ],
     status: "online",
   });
-});
 
+  await client.application.commands.set([
+    new SlashCommandBuilder()
+      .setName("tickets")
+      .setDescription("Wysyła panel ticketów"),
+    new SlashCommandBuilder()
+      .setName("cennik")
+      .setDescription("Wysyła panel cennika"),
+    new SlashCommandBuilder()
+      .setName("weryfikacja")
+      .setDescription("Wysyła panel weryfikacji"),
+    new SlashCommandBuilder()
+      .setName("drop")
+      .setDescription("Losuje drop"),
+    new SlashCommandBuilder()
+      .setName("close")
+      .setDescription("Zamyka aktualny ticket"),
+    new SlashCommandBuilder()
+      .setName("claim")
+      .setDescription("Przejmuje aktualny ticket"),
+    new SlashCommandBuilder()
+      .setName("konkurs")
+      .setDescription("Tworzy konkurs")
+      .addStringOption((option) =>
+        option
+          .setName("nagroda")
+          .setDescription("Nagroda w konkursie")
+          .setRequired(true)
+      )
+      .addIntegerOption((option) =>
+        option
+          .setName("czas")
+          .setDescription("Czas konkursu w minutach")
+          .setRequired(true)
+      )
+      .addStringOption((option) =>
+        option
+          .setName("opis")
+          .setDescription("Opis konkursu")
+          .setRequired(false)
+      ),
+  ]);
+
+  console.log("Komendy zostały zarejestrowane");
+});
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
@@ -215,7 +279,6 @@ client.on("messageCreate", async (message) => {
   const linkRegex =
     /(https?:\/\/|www\.|discord\.gg\/|discord\.com\/invite\/|dc\.gg\/|\.pl|\.com|\.net|\.gg)/i;
 
-
   if (linkRegex.test(message.content)) {
     await message.delete().catch(() => null);
 
@@ -231,6 +294,65 @@ client.on("messageCreate", async (message) => {
 
 client.on("interactionCreate", async (interaction) => {
   if (interaction.isChatInputCommand()) {
+    if (interaction.commandName === "close") {
+      if (!isTicketChannel(interaction.channel)) {
+        return interaction.reply({
+          content: "❌ Tej komendy możesz użyć tylko na tickecie.",
+          ephemeral: true,
+        });
+      }
+
+      await interaction.reply({
+        content: "🗑️ Ticket zostanie zamknięty za 3 sekundy...",
+      });
+
+      setTimeout(() => {
+        interaction.channel.delete().catch(console.error);
+      }, 3000);
+
+      return;
+    }
+
+    if (interaction.commandName === "claim") {
+      if (!isTicketChannel(interaction.channel)) {
+        return interaction.reply({
+          content: "❌ Tej komendy możesz użyć tylko na tickecie.",
+          ephemeral: true,
+        });
+      }
+
+      if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
+        return interaction.reply({
+          content: "❌ Nie masz uprawnień do claimowania ticketów.",
+          ephemeral: true,
+        });
+      }
+
+      if (interaction.channel.topic?.includes("Claimed by:")) {
+        return interaction.reply({
+          content: "❌ Ten ticket jest już przejęty.",
+          ephemeral: true,
+        });
+      }
+
+      await interaction.channel.setTopic(
+        `${interaction.channel.topic || ""} | Claimed by: ${interaction.user.id}`
+      );
+
+      const embed = new EmbedBuilder()
+        .setColor("#800080")
+        .setTitle("🎫 Ticket przejęty")
+        .setDescription(`Ten ticket został przejęty przez ${interaction.user}.`)
+        .setFooter({
+          text: "PixelCoreShop × TICKETY",
+          iconURL: interaction.guild.iconURL({ dynamic: true }),
+        });
+
+      return interaction.reply({
+        embeds: [embed],
+      });
+    }
+
     const adminOnlyCommands = ["tickets", "cennik", "weryfikacja", "konkurs"];
 
     if (
@@ -267,7 +389,8 @@ client.on("interactionCreate", async (interaction) => {
           { name: "🎁 Nagroda", value: `**${nagroda}**`, inline: false },
           { name: "⏰ Czas", value: `**${czas} minut**`, inline: true },
           { name: "📅 Koniec", value: `<t:${koniec}:R>`, inline: true },
-          { name: "📋 Opis", value: opis, inline: false }
+          { name: "📋 Opis", value: opis, inline: false },
+          { name: "👥 Uczestnicy", value: "**0**", inline: true }
         )
         .setFooter({
           text: "PixelCoreShop × KONKURSY",
@@ -344,37 +467,31 @@ client.on("interactionCreate", async (interaction) => {
             label: "【🔒】〉 cennik-sab",
             description: "sab",
             value: "opcja_1",
-            emoji: { id: "150402283297439754", name: "sab" },
           },
           {
             label: "【🎲】〉 mystery-sab",
             description: "sab",
             value: "opcja_2",
-            emoji: { id: "150402283297439754", name: "sab" },
           },
           {
             label: "【🏠】〉 index-bazy",
             description: "sab",
             value: "opcja_3",
-            emoji: { id: "150402283297439754", name: "sab" },
           },
           {
             label: "【🔫】〉 case-paradise",
             description: "case",
             value: "opcja_4",
-            emoji: { id: "1504022898413670430", name: "case" },
           },
           {
             label: "【😺】〉 Ps99",
             description: "ps99",
             value: "opcja_5",
-            emoji: { id: "1504023197396242463", name: "ps99" },
           },
           {
             label: "【💲】〉 robux",
             description: "robux",
             value: "opcja_6",
-            emoji: { id: "1504022804666908722", name: "robux" },
           },
         ]);
 
@@ -469,10 +586,12 @@ client.on("interactionCreate", async (interaction) => {
 
     if (choice === "zakup") {
       const categoryName = ticketNames[choice] || "ticket";
-      const userName = cleanName(interaction.user.username);
 
       const existing = interaction.guild.channels.cache.find(
-        (c) => c.name === `ticket-${categoryName}-${userName}`
+        (c) =>
+          c.type === ChannelType.GuildText &&
+          c.topic?.includes(`User: ${interaction.user.id}`) &&
+          c.name.startsWith(`ticket-${categoryName}-`)
       );
 
       if (existing) {
@@ -554,6 +673,26 @@ client.on("interactionCreate", async (interaction) => {
 
       konkurs.uczestnicy.add(interaction.user.id);
 
+      const channel = await client.channels.fetch(konkurs.channelId).catch(() => null);
+      const message = await channel?.messages.fetch(konkurs.messageId).catch(() => null);
+
+      if (message?.embeds[0]) {
+        const updatedEmbed = EmbedBuilder.from(message.embeds[0]);
+
+        const fields = message.embeds[0].fields.map((field) =>
+          field.name === "👥 Uczestnicy"
+            ? {
+                name: "👥 Uczestnicy",
+                value: `**${konkurs.uczestnicy.size}**`,
+                inline: true,
+              }
+            : field
+        );
+
+        updatedEmbed.setFields(fields);
+        await message.edit({ embeds: [updatedEmbed] }).catch(() => null);
+      }
+
       return interaction.reply({
         content: `Dołączyłeś do konkursu o **${konkurs.nagroda}**!`,
         ephemeral: true,
@@ -598,7 +737,7 @@ client.on("interactionCreate", async (interaction) => {
     }
 
     if (interaction.customId === "ticket_close") {
-      if (!interaction.channel.name.startsWith("ticket-")) {
+      if (!isTicketChannel(interaction.channel)) {
         return interaction.reply({
           content: "❌ To nie jest ticket!",
           ephemeral: true,
