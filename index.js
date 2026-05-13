@@ -620,31 +620,46 @@ Przebywanie na serwerze oznacza pełną akceptację zasad.
             label: "Zakup",
             description: "Otwórz ticket dotyczący zakupu",
             value: "zakup",
-            emoji: "💸",
+            emoji: {
+              id: "1504156893013213325",
+              name: "WOZEK1"
+            }
           },
           {
             label: "Skup",
             description: "Otwórz ticket dotyczący skupu",
             value: "skup",
-            emoji: "💰",
+            emoji: {
+              ID:"1504156893013213325",
+              NAME: "WOZEK1"
+            }
           },
           {
             label: "Index",
             description: "Otwórz ticket dotyczący indexu",
             value: "index",
-            emoji: "🏠",
+            emoji: {
+              id: "1504156016818786444",
+              name: "INFO1"
+            }
           },
           {
             label: "Middleman",
             description: "Otwórz ticket dotyczący middlemana",
             value: "middleman",
-            emoji: "🤝",
+            emoji: {
+              id: "1504156801892094144",
+              name: "VERIFY1"
+            }
           },
           {
             label: "Pomoc",
             description: "Otwórz ticket po pomoc administracji",
             value: "pomoc",
-            emoji: "📩",
+            emoji: {
+              id: "1504156448857391154",
+              name: "PYTANIE1"
+            }
           },
         ]);
 
