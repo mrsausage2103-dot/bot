@@ -8,60 +8,61 @@ const commands = [
     .setDescription("Wysyła panel ticketów"),
 
   new SlashCommandBuilder()
+    .setName("cennik")
+    .setDescription("Wysyła panel cennika"),
+
+  new SlashCommandBuilder()
     .setName("weryfikacja")
     .setDescription("Wysyła panel weryfikacji"),
 
   new SlashCommandBuilder()
-    .setName("cennik")
-    .setDescription("Wysyła dropdown z cennikiem"),
-
-  new SlashCommandBuilder()
     .setName("drop")
-    .setDescription("Losuje zniżkę"),
+    .setDescription("Losuje drop"),
 
   new SlashCommandBuilder()
-  .setName("konkurs")
-  .setDescription("Tworzy konkurs")
-  .addStringOption((option) =>
-    option
-      .setName("nagroda")
-      .setDescription("Co można wygrać?")
-      .setRequired(true)
-  )
-  .addIntegerOption((option) =>
-    option
-      .setName("czas")
-      .setDescription("Czas trwania konkursu w minutach")
-      .setRequired(true)
-  )
-  .addStringOption((option) =>
-    option
-      .setName("opis")
-      .setDescription("Opis konkursu")
-      .setRequired(false)
-  ),
+    .setName("close")
+    .setDescription("Zamyka aktualny ticket"),
 
+  new SlashCommandBuilder()
+    .setName("claim")
+    .setDescription("Przejmuje aktualny ticket"),
+
+  new SlashCommandBuilder()
+    .setName("konkurs")
+    .setDescription("Tworzy konkurs")
+    .addStringOption((option) =>
+      option
+        .setName("nagroda")
+        .setDescription("Nagroda w konkursie")
+        .setRequired(true)
+    )
+    .addIntegerOption((option) =>
+      option
+        .setName("czas")
+        .setDescription("Czas konkursu w minutach")
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("opis")
+        .setDescription("Opis konkursu")
+        .setRequired(false)
+    ),
 ].map((command) => command.toJSON());
 
 const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
 (async () => {
   try {
-    console.log("Czyszczenie globalnych komend...");
-
-    await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
-      body: [],
-    });
-
-    console.log("Dodawanie komend na serwer...");
+    console.log("Rejestrowanie komend...");
 
     await rest.put(
       Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
       { body: commands }
     );
 
-    console.log("Komendy zostały dodane.");
+    console.log("Komendy zarejestrowane.");
   } catch (error) {
-    console.error("Błąd przy dodawaniu komend:", error);
+    console.error(error);
   }
 })();
