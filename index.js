@@ -630,8 +630,8 @@ Przebywanie na serwerze oznacza pełną akceptację zasad.
             description: "Otwórz ticket dotyczący skupu",
             value: "skup",
             emoji: {
-              ID:"1504156893013213325",
-              NAME: "WOZEK1"
+              id:"1504156893013213325",
+              name: "WOZEK1"
             }
           },
           {
