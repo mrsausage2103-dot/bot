@@ -535,34 +535,60 @@ Przebywanie na serwerze oznacza pełną akceptację zasad.
         .setPlaceholder("❌ × Nie wybrałeś/aś żadnego cennika")
         .addOptions([
           {
-            label: "【🔒】〉 cennik-sab",
+            label: "〉 cennik-sab",
             description: "sab",
             value: "opcja_1",
+            emoji: {
+  id: "1504156589328961588",
+  name: "SAB1",
+}
+
           },
           {
-            label: "【🎲】〉 mystery-sab",
+            label: "〉 mystery-sab",
             description: "sab",
             value: "opcja_2",
+            emoji: {
+              id: "1504156589328961588",
+              name: "SAB1"
+            }
+            
           },
           {
-            label: "【🏠】〉 index-bazy",
+            label: "〉 index-bazy",
             description: "sab",
             value: "opcja_3",
+            emoji: {
+              id: "1504156589328961588",
+              name: "SAB1"
+            }
           },
           {
-            label: "【🔫】〉 case-paradise",
+            label: "〉 case-paradise",
             description: "case",
             value: "opcja_4",
+            emoji: {
+              id: "1504155876351545505",
+              name: "CASEPARADISE1"
+            }
           },
           {
-            label: "【😺】〉 Ps99",
+            label: "〉 Ps99",
             description: "ps99",
             value: "opcja_5",
+            emoji: {
+              id: "1504156420176613427",
+              name: "PS991"
+            }
           },
           {
-            label: "【💲】〉 robux",
+            label: "〉 robux",
             description: "robux",
             value: "opcja_6",
+            emoji: {
+              id: "1504156538301059343",
+              name: "ROBUX1"
+            }
           },
         ]);
 
