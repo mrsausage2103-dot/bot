@@ -311,6 +311,7 @@ client.on("messageCreate", async (message) => {
 -Wyciszenie (mute)
 -Tymczasowy ban
 -Stały ban
+
 §7 Postanowienia końcowe
 
 Regulamin wchodzi w życie z dniem publikacji.
@@ -332,10 +333,14 @@ Przebywanie na serwerze oznacza pełną akceptację zasad.
     return;
   }
 
-   const linkRegex =
+  const linkRegex =
     /(https?:\/\/|www\.|discord\.gg\/|discord\.com\/invite\/|dc\.gg\/|\.pl|\.com|\.net|\.gg)/i;
 
-    const hasAllowedGifLink =
+  const gifLinkRegex =
+  /https?:\/\/\S+\.gif(\?\S*)?/i;
+
+
+  const hasAllowedGifLink =
     gifLinkRegex.test(message.content) ||
     /https?:\/\/(www\.)?(tenor\.com|giphy\.com)\//i.test(message.content);
 
@@ -343,8 +348,6 @@ Przebywanie na serwerze oznacza pełną akceptację zasad.
     attachment.contentType === "image/gif" ||
     attachment.name?.toLowerCase().endsWith(".gif")
   );
-
-  const hasAllowedGifLink = gifLinkRegex.test(message.content);
 
   if (linkRegex.test(message.content) && !hasAllowedGifLink && !hasGifAttachment) {
     await message.delete().catch(() => null);
@@ -357,12 +360,9 @@ Przebywanie na serwerze oznacza pełną akceptację zasad.
       warning.delete().catch(() => null);
     }, 5000);
   }
-
 });
 
-
-
-client.on("interactionCreate", async (interaction) => {
+     client.on("interactionCreate", async (interaction) => {
   if (interaction.isChatInputCommand()) {
     if (interaction.commandName === "close") {
       if (!isTicketChannel(interaction.channel)) {
@@ -404,6 +404,7 @@ client.on("interactionCreate", async (interaction) => {
           ephemeral: true,
         });
       }
+
 
       await interaction.channel.setTopic(
         `${interaction.channel.topic || ""} | Claimed by: ${interaction.user.id}`
