@@ -335,8 +335,9 @@ Przebywanie na serwerze oznacza pełną akceptację zasad.
    const linkRegex =
     /(https?:\/\/|www\.|discord\.gg\/|discord\.com\/invite\/|dc\.gg\/|\.pl|\.com|\.net|\.gg)/i;
 
-  const gifLinkRegex =
-    /https?:\/\/\S+\.(gif)(\?\S*)?$/i;
+    const hasAllowedGifLink =
+    gifLinkRegex.test(message.content) ||
+    /https?:\/\/(www\.)?(tenor\.com|giphy\.com)\//i.test(message.content);
 
   const hasGifAttachment = message.attachments.some((attachment) =>
     attachment.contentType === "image/gif" ||
