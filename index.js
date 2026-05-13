@@ -160,7 +160,7 @@ Opisz dokładnie swoją sprawę, a administracja niedługo odpowie.`;
       .setTitle("🎫 Ticket utworzony")
       .setDescription(description)
       .setFooter({
-        text: "PixelCoreShop × TICKETY",
+        text: "`PixelCoreShop × TICKETY`",
         iconURL: interaction.guild.iconURL({ dynamic: true }),
       });
 
@@ -250,7 +250,7 @@ client.on("interactionCreate", async (interaction) => {
 
       const embed = new EmbedBuilder()
         .setColor("#800080")
-        .setTitle("🎉 PixelCoreShop × KONKURS")
+        .setTitle("`🎉 PixelCoreShop × KONKURS`")
         .addFields(
           { name: "🎁 Nagroda", value: `**${nagroda}**`, inline: false },
           { name: "⏰ Czas", value: `**${czas} minut**`, inline: true },
@@ -310,7 +310,7 @@ client.on("interactionCreate", async (interaction) => {
 
       const embed = new EmbedBuilder()
         .setColor("#800080")
-        .setTitle("✅ PixelCoreShop × WERYFIKACJA")
+        .setTitle("`✅ PixelCoreShop × WERYFIKACJA`")
         .setDescription("Kliknij przycisk poniżej, aby się zweryfikować.")
         .setFooter({
           text: "© 2026 PixelCoreShop × WERYFIKACJA",
@@ -370,7 +370,7 @@ client.on("interactionCreate", async (interaction) => {
 
       const embed = new EmbedBuilder()
         .setColor("#800080")
-        .setTitle("💰 PixelCoreShop × CENNIK")
+        .setTitle("`💰 PixelCoreShop × CENNIK`")
         .setDescription(
           "📋 × Aby zobaczyć cennik wybierz jedną z dostępnych kategorii."
         )
@@ -426,7 +426,7 @@ client.on("interactionCreate", async (interaction) => {
 
       const embed = new EmbedBuilder()
         .setColor("#800080")
-        .setTitle("🎫 PixelCoreShop × TICKETY")
+        .setTitle("`🎫 PixelCoreShop × TICKETY`")
         .setDescription(
           "📩 × Aby stworzyć ticketa wybierz jedną z dostępnych kategorii."
         )
