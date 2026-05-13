@@ -268,6 +268,63 @@ client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   if (!message.guild) return;
 
+  if (message.content === "!regulamin") {
+    return message.channel.send(`📜 REGULAMIN SERWERA
+§1 Postanowienia ogólne
+
+1.1 Dołączając do serwera, akceptujesz niniejszy regulamin.
+1.2 Regulamin obowiązuje wszystkich użytkowników bez wyjątku.
+1.3 Administracja zastrzega sobie prawo do zmiany regulaminu w dowolnym momencie.
+1.4 Nieznajomość regulaminu nie zwalnia z obowiązku jego przestrzegania.
+1.5 Serwer działa zgodnie z zasadami platformy Discord.
+
+§2 Zasady ogólne zachowania
+
+2.1 Szanuj innych użytkowników.
+2.2 Zakaz dyskryminacji.
+2.3 Zakaz treści NSFW.
+2.4 Zakaz spamowania.
+2.5 Zakaz reklamowania bez zgody administracji.
+
+§3 Kanały i porządek
+
+3.1 Korzystaj z kanałów zgodnie z ich przeznaczeniem.
+3.2 Nie rób offtopu.
+3.3 Nie używaj @everyone i @here.
+
+§4 Administracja
+
+4.1 Decyzje administracji są ostateczne.
+4.2 Próby omijania kar skutkują banem.
+
+§5 Kary
+
+- Ostrzeżenie
+- Wyciszenie
+- Tymczasowy ban
+- Stały ban
+
+§6 System kar
+
+6.1 W zależności od przewinienia mogą zostać zastosowane:
+-Ostrzeżenie
+-Wyciszenie (mute)
+-Tymczasowy ban
+-Stały ban
+§7 Postanowienia końcowe
+
+Regulamin wchodzi w życie z dniem publikacji.
+Przebywanie na serwerze oznacza pełną akceptację zasad.
+
+§8 Odwołania
+
+8.1 Użytkownik ma prawo odwołać się od kary poprzez kontakt z administracją.
+8.2 Administracja rozpatruje odwołania w ciągu maksymalnie 7 dni.
+8.3 Decyzja administracji jest ostateczna.
+ [MIMI], 
+`);
+  }
+
   if (message.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
     return;
   }
@@ -279,7 +336,7 @@ client.on("messageCreate", async (message) => {
   const linkRegex =
     /(https?:\/\/|www\.|discord\.gg\/|discord\.com\/invite\/|dc\.gg\/|\.pl|\.com|\.net|\.gg)/i;
 
-  if (linkRegex.test(message.content)) {
+    if (linkRegex.test(message.content)) {
     await message.delete().catch(() => null);
 
     const warning = await message.channel.send({
@@ -291,6 +348,8 @@ client.on("messageCreate", async (message) => {
     }, 5000);
   }
 });
+
+
 
 client.on("interactionCreate", async (interaction) => {
   if (interaction.isChatInputCommand()) {
@@ -698,6 +757,7 @@ client.on("interactionCreate", async (interaction) => {
         ephemeral: true,
       });
     }
+    
 
     if (interaction.customId === "verify") {
       const member = interaction.member;
