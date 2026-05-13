@@ -4,6 +4,7 @@ const express = require("express");
 const {
   Client,
   GatewayIntentBits,
+  ActivityType,
   ActionRowBuilder,
   StringSelectMenuBuilder,
   PermissionsBitField,
@@ -186,7 +187,18 @@ Opisz dokładnie swoją sprawę, a administracja niedługo odpowie.`;
 
 client.once("ready", () => {
   console.log(`Zalogowano jako ${client.user.tag}`);
+
+  client.user.setPresence({
+    activities: [
+      {
+        name: "PixelCoreShop",
+        type: ActivityType.Watching,
+      },
+    ],
+    status: "online",
+  });
 });
+
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
