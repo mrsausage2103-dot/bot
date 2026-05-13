@@ -320,8 +320,7 @@ Przebywanie na serwerze oznacza pełną akceptację zasad.
 
 8.1 Użytkownik ma prawo odwołać się od kary poprzez kontakt z administracją.
 8.2 Administracja rozpatruje odwołania w ciągu maksymalnie 7 dni.
-8.3 Decyzja administracji jest ostateczna.
- [MIMI], 
+8.3 Decyzja administracji jest ostateczna. 
 `);
   }
 
