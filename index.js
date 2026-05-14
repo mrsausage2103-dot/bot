@@ -42,6 +42,9 @@ const ticketNames = {
 
 const konkursy = new Map();
 const tworzoneTickety = new Set();
+const dropCooldowns = new Map();
+const DROP_COOLDOWN = 4 * 60 * 60 * 1000;
+
 
 const client = new Client({
   intents: [
@@ -263,6 +266,7 @@ client.once("ready", async () => {
 
   console.log("Komendy zostały zarejestrowane");
 });
+
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
@@ -490,22 +494,87 @@ Przebywanie na serwerze oznacza pełną akceptację zasad.
       return;
     }
 
-    if (interaction.commandName === "drop") {
-      await interaction.deferReply({ ephemeral: true });
+      if (interaction.commandName === "drop") {
+      await interaction.deferReply();
 
-      const wygrana = Math.random() < 0.025;
+      const now = Date.now();
+      const lastUse = dropCooldowns.get(interaction.user.id) || 0;
+      const timeLeft = DROP_COOLDOWN - (now - lastUse);
 
-      if (wygrana) {
-        return interaction.editReply({
-          content: "Gratulacje! Wylosowałeś **1 zł zniżki**!",
-        });
+      if (timeLeft > 0) {
+  const nextUse = Math.floor((lastUse + DROP_COOLDOWN) / 1000);
+
+  const cooldownEmbed = new EmbedBuilder()
+    .setColor("#800080")
+    .setTitle("🎁 PixelCoreShop × DROP")
+    .addFields(
+      {
+        name: "👤 Użytkownik",
+        value: `${interaction.user}`,
+        inline: true,
+      },
+      {
+        name: "📌 Wynik",
+        value: "⏳ Już użyłeś dropa. Spróbuj ponownie później.",
+        inline: true,
+      },
+      {
+        name: "🕒 Następne użycie",
+        value: `<t:${nextUse}:R>`,
+        inline: true,
       }
+    )
+    .setFooter({
+      text: "PixelCoreShop × DROP",
+      iconURL: interaction.guild.iconURL({ dynamic: true }),
+    });
+
+  return interaction.editReply({
+    embeds: [cooldownEmbed],
+  });
+}
+
+
+      dropCooldowns.set(interaction.user.id, now);
+
+      const wygrana = Math.random() < 0.01;
+      const nextUse = Math.floor((now + DROP_COOLDOWN) / 1000);
+
+      const dropEmbed = new EmbedBuilder()
+        .setColor(wygrana ? "#00ff7f" : "#800080")
+        .setTitle("🎁 PixelCoreShop × DROP")
+        .addFields(
+          {
+            name: "👤 Użytkownik",
+            value: `${interaction.user}`,
+            inline: true,
+          },
+          {
+            name: "📌 Wynik",
+            value: wygrana ? "🎉 2 zł zniżki" : "Pusto",
+            inline: true,
+          },
+          {
+            name: "🕒 Kolejna próba",
+            value: `<t:${nextUse}:R>`,
+            inline: true,
+          }
+        )
+        .setFooter({
+          text: "PixelCoreShop × DROP",
+          iconURL: interaction.guild.iconURL({ dynamic: true }),
+        });
 
       return interaction.editReply({
-        content: "Niestety, tym razem nic nie wypadło. Spróbuj ponownie później.",
+        embeds: [dropEmbed],
       });
     }
 
+  
+
+
+
+ 
     if (interaction.commandName === "weryfikacja") {
       const verifyButton = new ButtonBuilder()
         .setCustomId("verify")
