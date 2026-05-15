@@ -371,23 +371,34 @@ Przebywanie na serwerze oznacza pełną akceptację zasad.
 
      client.on("interactionCreate", async (interaction) => {
   if (interaction.isChatInputCommand()) {
-    const commandName = interaction.commandName;
+   const commandName = interaction.commandName;
 
-    const allowedOutsideCommandsChannel = ["drop", "close", "claim"];
+const allowedOutsideCommandsChannel = ["drop", "close", "claim", "konkurs"];
 
-    if (interaction.channelId === DROP_CHANNEL_ID && commandName !== "drop") {
-      return interaction.reply({
-        content: "❌ Na tym kanale możesz używać tylko komendy `/drop`.",
-        ephemeral: true,
-      });
-    }
+if (interaction.channelId === DROP_CHANNEL_ID && commandName !== "drop") {
+  return interaction.reply({
+    content: "❌ Na tym kanale możesz używać tylko komendy `/drop`.",
+    ephemeral: true,
+  });
+}
 
-    if (commandName === "drop" && interaction.channelId !== DROP_CHANNEL_ID) {
-      return interaction.reply({
-        content: `❌ Komendy \`/drop\` możesz użyć tylko na kanale <#${DROP_CHANNEL_ID}>.`,
-        ephemeral: true,
-      });
-    }
+if (commandName === "drop" && interaction.channelId !== DROP_CHANNEL_ID) {
+  return interaction.reply({
+    content: `❌ Komendy \`/drop\` możesz użyć tylko na kanale <#${DROP_CHANNEL_ID}>.`,
+    ephemeral: true,
+  });
+}
+
+if (
+  !allowedOutsideCommandsChannel.includes(commandName) &&
+  interaction.channelId !== COMMANDS_CHANNEL_ID
+) {
+  return interaction.reply({
+    content: `❌ Tej komendy możesz użyć tylko na kanale <#${COMMANDS_CHANNEL_ID}>.`,
+    ephemeral: true,
+  });
+}
+
 
     if (
       !allowedOutsideCommandsChannel.includes(commandName) &&
