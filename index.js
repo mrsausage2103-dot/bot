@@ -31,6 +31,9 @@ app.listen(3000, () => {
 const VERIFIED_ROLE_ID = "1503722955312599040";
 const VERIFIED_ROLE_ID_2 = "1503706292189921481";
 const LINK_ALLOWED_ROLE_ID = "1503847409506058361";
+const COMMANDS_CHANNEL_ID = "1504471489800306858";
+const DROP_CHANNEL_ID = "1504006288097411133";
+
 
 const ticketNames = {
   zakup: "zakup",
@@ -368,6 +371,34 @@ Przebywanie na serwerze oznacza pełną akceptację zasad.
 
      client.on("interactionCreate", async (interaction) => {
   if (interaction.isChatInputCommand()) {
+    const commandName = interaction.commandName;
+
+    const allowedOutsideCommandsChannel = ["drop", "close", "claim"];
+
+    if (interaction.channelId === DROP_CHANNEL_ID && commandName !== "drop") {
+      return interaction.reply({
+        content: "❌ Na tym kanale możesz używać tylko komendy `/drop`.",
+        ephemeral: true,
+      });
+    }
+
+    if (commandName === "drop" && interaction.channelId !== DROP_CHANNEL_ID) {
+      return interaction.reply({
+        content: `❌ Komendy \`/drop\` możesz użyć tylko na kanale <#${DROP_CHANNEL_ID}>.`,
+        ephemeral: true,
+      });
+    }
+
+    if (
+      !allowedOutsideCommandsChannel.includes(commandName) &&
+      interaction.channelId !== COMMANDS_CHANNEL_ID
+    ) {
+      return interaction.reply({
+        content: `❌ Tej komendy możesz użyć tylko na kanale <#${COMMANDS_CHANNEL_ID}>.`,
+        ephemeral: true,
+      });
+    }
+
     if (interaction.commandName === "close") {
       if (!isTicketChannel(interaction.channel)) {
         return interaction.reply({
@@ -375,6 +406,9 @@ Przebywanie na serwerze oznacza pełną akceptację zasad.
           ephemeral: true,
         });
       }
+
+      // reszta twojego kodu /close
+
 
       await interaction.reply({
         content: "🗑️ Ticket zostanie zamknięty za 3 sekundy...",
