@@ -31,7 +31,12 @@ app.listen(3000, () => {
 const VERIFIED_ROLE_ID = "1503722955312599040";
 const VERIFIED_ROLE_ID_2 = "1503706292189921481";
 const LINK_ALLOWED_ROLE_ID = "1503847409506058361";
-const COMMANDS_CHANNEL_ID = "1504471489800306858";
+const COMMANDS_CHANNEL_IDS = [
+  "1504471489800306858",
+  "1504006511905472523",
+  "1503763169204633711",
+];
+
 const DROP_CHANNEL_ID = "1504006288097411133";
 
 
@@ -391,24 +396,17 @@ if (commandName === "drop" && interaction.channelId !== DROP_CHANNEL_ID) {
 
 if (
   !allowedOutsideCommandsChannel.includes(commandName) &&
-  interaction.channelId !== COMMANDS_CHANNEL_ID
+  !COMMANDS_CHANNEL_IDS.includes(interaction.channelId)
+
 ) {
   return interaction.reply({
-    content: `❌ Tej komendy możesz użyć tylko na kanale <#${COMMANDS_CHANNEL_ID}>.`,
+    content: "❌ Tej komendy nie możesz użyć na tym kanale.",
     ephemeral: true,
   });
 }
 
 
-    if (
-      !allowedOutsideCommandsChannel.includes(commandName) &&
-      interaction.channelId !== COMMANDS_CHANNEL_ID
-    ) {
-      return interaction.reply({
-        content: `❌ Tej komendy możesz użyć tylko na kanale <#${COMMANDS_CHANNEL_ID}>.`,
-        ephemeral: true,
-      });
-    }
+   
 
     if (interaction.commandName === "close") {
       if (!isTicketChannel(interaction.channel)) {
@@ -704,6 +702,33 @@ if (
               name: "ROBUX1"
             }
           },
+          {
+  label: "〉 streaming",
+  description: "netflix, hbo, disney",
+  value: "opcja_7",
+  emoji: {
+    id: "1505094966450323506",
+    name: "NETFLIX1"
+  }
+},
+{
+  label: "〉 gry",
+  description: "minecraft, steam",
+  value: "opcja_8",
+  emoji: {
+    id: "1505093989207113829",
+    name: "PAD1"
+  }
+},
+{
+  label: "〉 discord",
+  description: "nitro, dekoracje",
+  value: "opcja_9",
+  emoji: {
+    id: "1504156249434886154",
+    name: "NITRO1"
+  }
+},
         ]);
 
       const row = new ActionRowBuilder().addComponents(menu);
@@ -775,6 +800,35 @@ if (
               name: "PYTANIE1"
             }
           },
+           {
+  label: "〉 streaming",
+  description: "netflix, hbo, disney",
+  value: "opcja_7",
+  emoji: {
+    id: "1505086709178564670",
+    name: "NETFLIX1"
+  }
+},
+{
+  label: "〉 gry",
+  description: "minecraft, steam",
+  value: "opcja_8",
+  emoji: {
+    id: "1505087472407937194",
+    name: "PAD1"
+  }
+},
+{
+  label: "〉 discord",
+  description: "nitro, dekoracje",
+  value: "opcja_9",
+  emoji: {
+    id: "1504156249434886154",
+    name: "NITRO1"
+  }
+},
+
+          
         ]);
 
       const row = new ActionRowBuilder().addComponents(menu);
@@ -798,71 +852,156 @@ if (
   }
 
   if (interaction.isStringSelectMenu()) {
-    if (interaction.customId === "my_dropdown") {
-      return interaction.reply({
-        content: "odp",
-        ephemeral: true,
-      });
-    }
-
-    if (interaction.customId !== "ticket_select") return;
-    if (!interaction.guild) return;
-
+  if (interaction.customId === "my_dropdown") {
     const choice = interaction.values[0];
 
-    if (choice === "zakup") {
-      const categoryName = ticketNames[choice] || "ticket";
-
-      const existing = interaction.guild.channels.cache.find(
-        (c) =>
-          c.type === ChannelType.GuildText &&
-          c.topic?.includes(`User: ${interaction.user.id}`) &&
-          c.name.startsWith(`ticket-${categoryName}-`)
-      );
-
-      if (existing) {
-        return interaction.reply({
-          content: "❌ ᴍᴀꜱᴢ ᴊᴜᴢ̇ ᴏᴛᴡᴀʀᴛʏ ᴛɪᴄᴋᴇᴛ!",
-          ephemeral: true,
-        });
+    const cenniki = {
+      opcja_1: {
+        title: "💰 PixelCoreShop × CENNIK SAB",
+        table: [
+          ["Produkt", "Cena"],
+          ["Soon", "? zł"],
+          ["Soon", "? zł"],
+          ["Soon", "? zł"],
+        ],
+      },
+      opcja_2: {
+        title: "💰 PixelCoreShop × MYSTERY SAB",
+        table: [
+          ["Produkt", "Cena"],
+          ["Soon", "? zł"],
+          ["Soon", "? zł"],
+          ["Soon", "? zł"],
+        ],
+      },
+      opcja_3: {
+        title: "💰 PixelCoreShop × INDEX BAZY",
+        table: [
+          ["Produkt", "Cena"],
+          ["Soon", "? zł"],
+          ["Soon", "? zł"],
+          ["Soon", "? zł"],
+        ],
+      },
+      opcja_4: {
+        title: "💰 PixelCoreShop × CASE PARADISE",
+        table: [
+          ["Produkt", "Cena"],
+          ["Soon", "? zł"],
+          ["Soon", "? zł"],
+          ["Soon", "? zł"],
+        ],
+      },
+      opcja_5: {
+        title: "💰 PixelCoreShop × PS99",
+        table: [
+          ["Produkt", "Cena"],
+          ["Soon", "? zł"],
+          ["Soon", "? zł"],
+          ["Soon", "? zł"],
+        ],
+      },
+      opcja_6: {
+        title: "💰 PixelCoreShop × ROBUX",
+        table: [
+          ["Produkt", "Cena"],
+          ["1000 Robux", "x zł"],
+        ],
+      },
+       opcja_7: {
+        title: "💰 PixelCoreShop × CENNIK STREAMING",
+        table: [
+          ["Produkt", "Cena"],
+          ["N3tfix nfa lf", "6 zł"],
+          ["Hbo nfa lf", "5 zł"],
+          ["Disney", "5 zł"],
+        ],
+      },
+      opcja_8: {
+        title: "💰 PixelCoreShop × CENNIK GRY",
+        table: [
+          ["Produkt", "Cena"],
+          ["Minecraft fa acc", "15 zł"],
+          ["steam acc random games", "5 zł"],
+          ["patent na all gry steam", "18 zł"],
+        ],
+      },
+      opcja_9: {
+        title: "💰 PixelCoreShop × CENNIK DISCORD",
+        table: [
+          ["Produkt", "Cena"],
+          ["Nitro basic 1m", "5.50 zł"],
+          ["Nitro boost", "16 zł"],
+          ["3 random deko", "20 zł"],
+        ],
       }
+    };
 
-      const modal = new ModalBuilder()
-        .setCustomId("ticket_zakup_modal")
-        .setTitle("Zakup");
+    const selected = cenniki[choice];
 
-      const itemInput = new TextInputBuilder()
-        .setCustomId("zakup_item")
-        .setLabel("Co chcesz kupić?")
-        .setStyle(TextInputStyle.Short)
-        .setPlaceholder("np. SAB, Robux, PS99")
-        .setRequired(true);
+    const tableText = selected.table
+      .map((row) => `${row[0].padEnd(18)} | ${row[1]}`)
+      .join("\n");
 
-      const budgetInput = new TextInputBuilder()
-        .setCustomId("zakup_budget")
-        .setLabel("Jaki masz budżet?")
-        .setStyle(TextInputStyle.Short)
-        .setPlaceholder("np. 20 zł, 50 zł, 100 zł")
-        .setRequired(true);
+    const embed = new EmbedBuilder()
+      .setColor("#800080")
+      .setTitle(selected.title)
+      .setDescription(`\`\`\`\n${tableText}\n\`\`\``)
+      .setFooter({
+        text: "© 2026 PixelCoreShop × CENNIK",
+        iconURL: interaction.guild.iconURL({ dynamic: true }),
+      });
 
-      const paymentInput = new TextInputBuilder()
-        .setCustomId("zakup_payment")
-        .setLabel("Czym płacisz?")
-        .setStyle(TextInputStyle.Short)
-        .setPlaceholder("np. BLIK, PayPal, PSC")
-        .setRequired(true);
-
-      modal.addComponents(
-        new ActionRowBuilder().addComponents(itemInput),
-        new ActionRowBuilder().addComponents(budgetInput),
-        new ActionRowBuilder().addComponents(paymentInput)
-      );
-
-      return interaction.showModal(modal);
-    }
-
-    return createTicket(interaction, choice);
+    return interaction.reply({
+      embeds: [embed],
+      ephemeral: true,
+    });
   }
+
+  if (interaction.customId !== "ticket_select") return;
+  if (!interaction.guild) return;
+
+  const choice = interaction.values[0];
+
+  if (choice === "zakup") {
+    const modal = new ModalBuilder()
+      .setCustomId("ticket_zakup_modal")
+      .setTitle("Zakup");
+
+    const itemInput = new TextInputBuilder()
+      .setCustomId("zakup_item")
+      .setLabel("Co chcesz kupić?")
+      .setStyle(TextInputStyle.Short)
+      .setPlaceholder("np. SAB, Robux, PS99")
+      .setRequired(true);
+
+    const budgetInput = new TextInputBuilder()
+      .setCustomId("zakup_budget")
+      .setLabel("Jaki masz budżet?")
+      .setStyle(TextInputStyle.Short)
+      .setPlaceholder("np. 20 zł, 50 zł, 100 zł")
+      .setRequired(true);
+
+    const paymentInput = new TextInputBuilder()
+      .setCustomId("zakup_payment")
+      .setLabel("Czym płacisz?")
+      .setStyle(TextInputStyle.Short)
+      .setPlaceholder("np. BLIK, PayPal, PSC")
+      .setRequired(true);
+
+    modal.addComponents(
+      new ActionRowBuilder().addComponents(itemInput),
+      new ActionRowBuilder().addComponents(budgetInput),
+      new ActionRowBuilder().addComponents(paymentInput)
+    );
+
+    return interaction.showModal(modal);
+  }
+
+  return createTicket(interaction, choice);
+}
+
+  
 
   if (interaction.isModalSubmit()) {
     if (interaction.customId === "ticket_zakup_modal") {
