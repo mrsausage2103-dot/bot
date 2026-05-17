@@ -905,7 +905,7 @@ if (
         title: "💰 PixelCoreShop × ROBUX",
         table: [
           ["Produkt", "Cena"],
-          ["1000 Robux", "x zł"],
+          ["1000 Robux", "17 zł"],
         ],
       },
        opcja_7: {
