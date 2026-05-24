@@ -19,12 +19,13 @@ const {
 } = require("discord.js");
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
 app.get("/", (req, res) => {
   res.send("Bot działa");
 });
 
-app.listen(3000, () => {
+app.listen(PORT, () => {
   console.log("Serwer HTTP działa");
 });
 
@@ -217,7 +218,7 @@ Opisz dokładnie swoją sprawę, a administracja niedługo odpowie.`;
   }
 }
 
-client.once("ready", async () => {
+client.once("clientReady", async () => {
   console.log(`Zalogowano jako ${client.user.tag}`);
 
   client.user.setPresence({
@@ -635,14 +636,18 @@ if (
           iconURL: interaction.guild.iconURL({ dynamic: true }),
         });
 
-      return interaction.reply({
-        embeds: [embed],
-        components: [row],
-      });
+      return interaction.editReply({
+  embeds: [embed],
+  components: [row],
+});
     }
 
     if (interaction.commandName === "cennik") {
+
+  await interaction.deferReply();
+
       const menu = new StringSelectMenuBuilder()
+      
         .setCustomId("my_dropdown")
         .setPlaceholder("❌ × Nie wybrałeś/aś żadnego cennika")
         .addOptions([
@@ -728,7 +733,17 @@ if (
     id: "1504156249434886154",
     name: "NITRO1"
   }
+  },
+{
+  label: "〉 Serwer",
+  description: "Serwer",
+  value: "opcja_10",
+  emoji: {
+    id: "1504156043473584258",
+    name: "KONTO1"
+  }
 },
+
         ]);
 
       const row = new ActionRowBuilder().addComponents(menu);
@@ -744,7 +759,7 @@ if (
           iconURL: interaction.guild.iconURL({ dynamic: true }),
         });
 
-      return interaction.reply({
+      return interaction.editReply({
         embeds: [embed],
         components: [row],
       });
@@ -826,7 +841,15 @@ if (
     id: "1504156249434886154",
     name: "NITRO1"
   }
-},
+}, {
+            label: "〉 Serwer",
+            description: "Serwer",
+            value: "opcja_10",
+            emoji: {
+              id: "1504156043473584258",
+              name: "KONTO1"
+            }
+          },
 
           
         ]);
@@ -934,24 +957,31 @@ if (
           ["Nitro boost", "16 zł"],
           ["3 random deko", "20 zł"],
         ],
+      },
+      opcja_10: {
+        title: "💰 PixelCoreShop × SERWER",
+        table: [
+          ["Produkt", "Cena"],
+          ["Kanały, role", "5.50 zł"],
+          ["Kanały, role, emoji ", "10 zł"],
+          ["Kanały, role, emoji, custom bot", "15 zł"],
+        ],
       }
     };
 
     const selected = cenniki[choice];
 
-    const tableText = selected.table
-      .map((row) => `${row[0].padEnd(18)} | ${row[1]}`)
-      .join("\n");
-
     const embed = new EmbedBuilder()
-      .setColor("#800080")
-      .setTitle(selected.title)
-      .setDescription(`\`\`\`\n${tableText}\n\`\`\``)
-      .setFooter({
-        text: "© 2026 PixelCoreShop × CENNIK",
-        iconURL: interaction.guild.iconURL({ dynamic: true }),
-      });
+  .setColor("#800080")
+  .setTitle(selected.title);
 
+selected.table.slice(1).forEach((row) => {
+  embed.addFields({
+    name: row[0],
+    value: `💰 ${row[1]}`,
+    inline: false,
+  });
+});
     return interaction.reply({
       embeds: [embed],
       ephemeral: true,
@@ -1122,4 +1152,29 @@ if (
   }
 });
 
-client.login(process.env.TOKEN);
+async function startBot() {
+  if (!process.env.TOKEN) {
+    console.error("Brakuje TOKEN w pliku .env.");
+    process.exit(1);
+  }
+
+  try {
+    await client.login(process.env.TOKEN);
+  } catch (error) {
+    console.error("Nie udalo sie polaczyc z Discordem.");
+
+    if (error?.code === "EACCES") {
+      console.error(
+        "System albo zapora blokuje polaczenie wychodzace do Discorda na porcie 443."
+      );
+    } else if (error?.code === "TokenInvalid") {
+      console.error("Token bota w pliku .env jest niepoprawny.");
+    } else {
+      console.error(error);
+    }
+
+    process.exit(1);
+  }
+}
+
+startBot();
